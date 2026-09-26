@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "db:sync-indexes": "node scripts/syncIndexes.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write . --ignore-path ../.gitignore --ignore-path ../.prettierignore",

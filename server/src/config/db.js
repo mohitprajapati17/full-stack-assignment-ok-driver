@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { env } from './env.js';
+import '../models/index.js';
 
 const READY_STATES = {
   0: 'disconnected',
@@ -17,6 +18,10 @@ export async function connectDB() {
 
   await mongoose.connect(env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
+    maxPoolSize: env.MONGODB_MAX_POOL_SIZE,
+    // In production, indexes are managed explicitly via `npm run db:sync-indexes`
+    // to avoid index builds blocking startup on large collections.
+    autoIndex: !env.isProduction,
   });
 
   const { connection } = mongoose;
@@ -25,6 +30,18 @@ export async function connectDB() {
   connection.on('disconnected', () => console.warn('[db] MongoDB disconnected'));
   connection.on('reconnected', () => console.info('[db] MongoDB reconnected'));
   connection.on('error', (err) => console.error('[db] MongoDB error:', err.message));
+}
+
+/**
+ * Makes each collection's indexes match the schema definitions exactly,
+ * creating missing indexes and dropping ones that are no longer declared.
+ */
+export async function syncIndexes() {
+  const results = {};
+  for (const model of Object.values(mongoose.models)) {
+    results[model.modelName] = await model.syncIndexes();
+  }
+  return results;
 }
 
 export async function disconnectDB() {

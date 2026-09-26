@@ -5,6 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
+  MONGODB_MAX_POOL_SIZE: z.coerce.number().int().positive().default(10),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
 });
 

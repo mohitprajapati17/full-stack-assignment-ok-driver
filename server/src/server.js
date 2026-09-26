@@ -13,6 +13,13 @@ async function start() {
 
   const server = http.createServer(createApp());
 
+  server.on('error', async (err) => {
+    const message = err.code === 'EADDRINUSE' ? `Port ${env.PORT} is already in use` : err.message;
+    console.error(`[server] Failed to start: ${message}`);
+    await disconnectDB();
+    process.exit(1);
+  });
+
   server.listen(env.PORT, () => {
     console.info(`[server] Listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
   });
