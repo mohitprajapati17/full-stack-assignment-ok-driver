@@ -1,7 +1,7 @@
 import { useHealth } from '@/features/health/useHealth';
 
 export function HomePage() {
-  const { data, error, isPending } = useHealth();
+  const { data, error } = useHealth();
 
   let statusLabel = 'Checking…';
   let statusColor = 'bg-slate-500';
@@ -18,7 +18,7 @@ export function HomePage() {
       <h1 className="text-2xl font-semibold">System status</h1>
       <div className="inline-flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
         <span className={`h-2.5 w-2.5 rounded-full ${statusColor}`} aria-hidden="true" />
-        <span className="text-sm text-slate-300">{isPending ? 'Checking…' : statusLabel}</span>
+        <span className="text-sm text-slate-300">{statusLabel}</span>
       </div>
     </section>
   );

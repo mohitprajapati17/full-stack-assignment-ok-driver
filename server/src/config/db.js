@@ -15,16 +15,16 @@ export function getDbStatus() {
 export async function connectDB() {
   mongoose.set('strictQuery', true);
 
-  mongoose.connection.on('disconnected', () => console.warn('[db] MongoDB disconnected'));
-  mongoose.connection.on('reconnected', () => console.info('[db] MongoDB reconnected'));
-  mongoose.connection.on('error', (err) => console.error('[db] MongoDB error:', err.message));
-
   await mongoose.connect(env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
   });
 
-  const { host, port, name } = mongoose.connection;
-  console.info(`[db] MongoDB connected: ${host}:${port}/${name}`);
+  const { connection } = mongoose;
+  console.info(`[db] MongoDB connected: ${connection.host}:${connection.port}/${connection.name}`);
+
+  connection.on('disconnected', () => console.warn('[db] MongoDB disconnected'));
+  connection.on('reconnected', () => console.info('[db] MongoDB reconnected'));
+  connection.on('error', (err) => console.error('[db] MongoDB error:', err.message));
 }
 
 export async function disconnectDB() {

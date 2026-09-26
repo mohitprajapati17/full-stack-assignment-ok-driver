@@ -13,8 +13,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --write . --ignore-path ../.gitignore --ignore-path ../.prettierignore",
+    "format:check": "prettier --check . --ignore-path ../.gitignore --ignore-path ../.prettierignore"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.0",
