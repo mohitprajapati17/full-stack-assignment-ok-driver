@@ -58,21 +58,35 @@ Each feature module keeps its own `*.routes.js`, `*.controller.js`, `*.service.j
 cd server && npm install
 cd ../client && npm install
 
-# 2. Create env files
+# 2. Create env files, then set JWT_SECRET in server/.env
 cp server/.env.example server/.env
 cp client/.env.example client/.env
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+
+# 3. Seed demo users and sample cameras (development only)
+cd server && npm run db:seed
 ```
+
+The seed script creates two accounts (override with `SEED_*` env vars):
+
+| Role     | Email                     | Password         |
+| -------- | ------------------------- | ---------------- |
+| Admin    | `admin@okdriver.local`    | `Admin@12345`    |
+| Operator | `operator@okdriver.local` | `Operator@12345` |
 
 ### Environment variables
 
 **server/.env**
 
-| Variable        | Default                              | Description                                |
-| --------------- | ------------------------------------ | ------------------------------------------ |
-| `NODE_ENV`      | `development`                        | `development`, `test`, or `production`     |
-| `PORT`          | `4000`                               | API port                                   |
-| `MONGODB_URI`   | – (required)                         | e.g. `mongodb://127.0.0.1:27017/okdriver`  |
-| `CLIENT_ORIGIN` | `http://localhost:5173`              | Comma-separated CORS allowlist             |
+| Variable                | Default                 | Description                               |
+| ----------------------- | ----------------------- | ----------------------------------------- |
+| `NODE_ENV`              | `development`           | `development`, `test`, or `production`    |
+| `PORT`                  | `4000`                  | API port                                  |
+| `MONGODB_URI`           | – (required)            | e.g. `mongodb://127.0.0.1:27017/okdriver` |
+| `MONGODB_MAX_POOL_SIZE` | `10`                    | Mongoose connection pool size             |
+| `CLIENT_ORIGIN`         | `http://localhost:5173` | Comma-separated CORS allowlist            |
+| `JWT_SECRET`            | – (required)            | At least 32 random characters             |
+| `JWT_EXPIRES_IN`        | `8h`                    | Access token lifetime                     |
 
 The server validates these at startup and exits with a clear message if any are invalid.
 
@@ -117,23 +131,82 @@ curl http://localhost:4000/api/health
 
 Returns `200` when MongoDB is connected and `503` (`"status": "degraded"`) otherwise.
 
+## API
+
+All endpoints except `/api/health` and `/api/auth/login` require `Authorization: Bearer <token>`.
+Errors use the shape `{ "error": { "message", "details"? } }`.
+
+### Auth
+
+| Method | Path              | Description                               |
+| ------ | ----------------- | ----------------------------------------- |
+| POST   | `/api/auth/login` | `{ email, password }` → `{ token, user }` |
+| GET    | `/api/auth/me`    | Current user                              |
+
+### Cameras
+
+| Method | Path                          | Role  | Description                                         |
+| ------ | ----------------------------- | ----- | --------------------------------------------------- |
+| GET    | `/api/cameras`                | any   | List with search, filters, sorting and pagination   |
+| GET    | `/api/cameras/filter-options` | any   | Distinct departments and zones for filter dropdowns |
+| GET    | `/api/cameras/:id`            | any   | Camera details                                      |
+| POST   | `/api/cameras`                | ADMIN | Create a camera                                     |
+| PUT    | `/api/cameras/:id`            | ADMIN | Replace the camera configuration                    |
+| PATCH  | `/api/cameras/:id/status`     | ADMIN | `{ status, lastHeartbeat? }`                        |
+| DELETE | `/api/cameras/:id`            | ADMIN | Disable (soft delete); the record is kept           |
+
+`GET /api/cameras` query parameters:
+
+| Param        | Values                                                                                        | Default     |
+| ------------ | --------------------------------------------------------------------------------------------- | ----------- |
+| `search`     | Matches name, cameraId, department or zone (case-insensitive)                                 | –           |
+| `status`     | `ONLINE`, `OFFLINE`, `DEGRADED`                                                               | –           |
+| `department` | Exact department                                                                              | –           |
+| `zone`       | Exact zone                                                                                    | –           |
+| `isActive`   | `true`, `false`, `all`                                                                        | `true`      |
+| `page`       | ≥ 1                                                                                           | `1`         |
+| `limit`      | 1–100                                                                                         | `20`        |
+| `sortBy`     | `name`, `cameraId`, `status`, `department`, `zone`, `lastHeartbeat`, `createdAt`, `updatedAt` | `createdAt` |
+| `sortOrder`  | `asc`, `desc`                                                                                 | `desc`      |
+
+Notes:
+
+- `PUT` requires the full configuration; omitted optional fields are cleared. `status` and
+  `lastHeartbeat` are only changed through `PATCH /status`. Send `isActive: true` to re-enable a
+  disabled camera.
+- Stream URL credentials (`rtsp://user:pass@host`) are masked as `***` for operators.
+- Create, update, status changes and disable are recorded in the audit log.
+
+## Tests
+
+API integration tests use Node's built-in test runner against a real MongoDB. Each test file
+creates and drops its own `okdriver_test_*` database.
+
+```bash
+cd server && npm test
+```
+
 ## Scripts
 
-| Location | Command                  | Description                        |
-| -------- | ------------------------ | ---------------------------------- |
-| server   | `npm run dev`            | Start API with auto-restart        |
-| server   | `npm start`              | Start API (production)             |
-| client   | `npm run dev`            | Start Vite dev server              |
-| client   | `npm run build`          | Production build to `client/dist`  |
-| client   | `npm run preview`        | Preview the production build       |
-| both     | `npm run lint`           | Run ESLint                         |
-| both     | `npm run format`         | Format with Prettier               |
-| both     | `npm run format:check`   | Check formatting                   |
+| Location | Command                   | Description                          |
+| -------- | ------------------------- | ------------------------------------ |
+| server   | `npm run dev`             | Start API with auto-restart          |
+| server   | `npm start`               | Start API (production)               |
+| server   | `npm run db:sync-indexes` | Create/drop indexes to match schemas |
+| server   | `npm run db:seed`         | Seed demo users and sample cameras   |
+| server   | `npm test`                | Run API integration tests            |
+| client   | `npm run dev`             | Start Vite dev server                |
+| client   | `npm run build`           | Production build to `client/dist`    |
+| client   | `npm run preview`         | Preview the production build         |
+| both     | `npm run lint`            | Run ESLint                           |
+| both     | `npm run format`          | Format with Prettier                 |
+| both     | `npm run format:check`    | Check formatting                     |
 
 ## Roadmap
 
-- [ ] JWT authentication and role-based access
-- [ ] Cameras CRUD and live status
+- [x] JWT authentication and role-based access (login only; user management pending)
+- [x] Camera registry (CRUD, search, filters, pagination)
+- [ ] Live camera heartbeats and status via Socket.IO
 - [ ] Detections ingestion and search
 - [ ] Watchlist management and matching
 - [ ] Realtime alerts via Socket.IO

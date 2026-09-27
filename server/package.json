@@ -13,6 +13,8 @@
     "start": "node src/server.js",
     "db:sync-indexes": "node scripts/syncIndexes.js",
     "db:seed": "node scripts/seed.js",
+    "db:demo": "node scripts/demoData.js",
+    "db:demo:clear": "node scripts/demoData.js --clear",
     "test": "node --test --test-concurrency=1 \"tests/**/*.test.js\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
