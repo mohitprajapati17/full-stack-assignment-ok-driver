@@ -10,11 +10,12 @@ export const cameraKeys = {
   filterOptions: () => [...cameraKeys.all, 'filter-options'],
 };
 
-export function useCameraList(params) {
+export function useCameraList(params, options) {
   return useQuery({
     queryKey: cameraKeys.list(params),
     queryFn: () => camerasApi.listCameras(params),
     placeholderData: keepPreviousData,
+    ...options,
   });
 }
 

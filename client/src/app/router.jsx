@@ -6,7 +6,7 @@ import { CameraCreatePage } from '@/pages/cameras/CameraCreatePage';
 import { CameraDetailsPage } from '@/pages/cameras/CameraDetailsPage';
 import { CameraEditPage } from '@/pages/cameras/CameraEditPage';
 import { CameraListPage } from '@/pages/cameras/CameraListPage';
-import { HomePage } from '@/pages/HomePage';
+import { DashboardPage } from '@/pages/DashboardPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <DashboardPage /> },
       {
         path: 'cameras',
         children: [

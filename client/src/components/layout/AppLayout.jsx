@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { formatEnum } from '@/lib/format';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Overview', end: true },
+  { to: '/', label: 'Dashboard', end: true },
   { to: '/cameras', label: 'Cameras' },
 ];
 
@@ -16,7 +16,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-slate-800">
-        <div className="mx-auto flex max-w-7xl items-center gap-8 px-6 py-3">
+        <div className="mx-auto flex max-w-[96rem] flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3 sm:px-6">
           <Link to="/" className="text-lg font-semibold tracking-tight">
             okDriver <span className="text-slate-400">CCTV Monitoring</span>
           </Link>
@@ -46,7 +46,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-[96rem] px-4 py-6 sm:px-6 sm:py-8">
         <Outlet />
       </main>
     </div>

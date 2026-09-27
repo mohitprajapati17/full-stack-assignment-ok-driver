@@ -14,23 +14,25 @@ export const DEFAULT_LIST_PARAMS = Object.freeze({
 });
 
 const NUMERIC_KEYS = new Set(['page', 'limit']);
+const FILTER_KEYS = ['search', 'status', 'department', 'zone', 'isActive'];
 
 /**
- * Keeps the camera list's search, filters, sorting and pagination in the URL so the view
+ * Keeps a camera list's search, filters, sorting and pagination in the URL so the view
  * survives reloads and can be shared. Changing anything other than `page` resets to page 1.
+ * `defaults` must be a stable (module-level) object.
  */
-export function useCameraListParams() {
+export function useCameraListParams(defaults = DEFAULT_LIST_PARAMS) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const params = useMemo(() => {
-    const result = { ...DEFAULT_LIST_PARAMS };
-    for (const key of Object.keys(DEFAULT_LIST_PARAMS)) {
+    const result = { ...defaults };
+    for (const key of Object.keys(defaults)) {
       const raw = searchParams.get(key);
       if (raw === null) continue;
-      result[key] = NUMERIC_KEYS.has(key) ? Number(raw) || DEFAULT_LIST_PARAMS[key] : raw;
+      result[key] = NUMERIC_KEYS.has(key) ? Number(raw) || defaults[key] : raw;
     }
     return result;
-  }, [searchParams]);
+  }, [searchParams, defaults]);
 
   const setParams = useCallback(
     (updates) => {
@@ -38,8 +40,7 @@ export function useCameraListParams() {
         (current) => {
           const next = new URLSearchParams(current);
           for (const [key, value] of Object.entries(updates)) {
-            if (value === '' || value == null || value === DEFAULT_LIST_PARAMS[key])
-              next.delete(key);
+            if (value === '' || value == null || value === defaults[key]) next.delete(key);
             else next.set(key, String(value));
           }
           if (!('page' in updates)) next.delete('page');
@@ -48,7 +49,7 @@ export function useCameraListParams() {
         { replace: true },
       );
     },
-    [setSearchParams],
+    [setSearchParams, defaults],
   );
 
   const toggleSort = useCallback(
@@ -64,9 +65,7 @@ export function useCameraListParams() {
 
   const resetFilters = useCallback(() => setSearchParams({}, { replace: true }), [setSearchParams]);
 
-  const hasActiveFilters = ['search', 'status', 'department', 'zone', 'isActive'].some(
-    (key) => params[key] !== DEFAULT_LIST_PARAMS[key],
-  );
+  const hasActiveFilters = FILTER_KEYS.some((key) => params[key] !== defaults[key]);
 
   return { params, setParams, toggleSort, resetFilters, hasActiveFilters };
 }

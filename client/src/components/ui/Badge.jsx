@@ -3,6 +3,7 @@ import { cn } from '@/lib/cn';
 const TONES = {
   green: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30',
   amber: 'bg-amber-500/10 text-amber-300 ring-amber-500/30',
+  orange: 'bg-orange-500/10 text-orange-300 ring-orange-500/30',
   red: 'bg-red-500/10 text-red-300 ring-red-500/30',
   sky: 'bg-sky-500/10 text-sky-300 ring-sky-500/30',
   slate: 'bg-slate-500/10 text-slate-300 ring-slate-500/30',

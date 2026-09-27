@@ -9,7 +9,13 @@ import { useCameraFilterOptions } from '../useCameraQueries';
 
 const toPlainOptions = (values = []) => values.map((value) => ({ value, label: value }));
 
-export function CameraFilters({ params, onChange, onReset, hasActiveFilters }) {
+export function CameraFilters({
+  params,
+  onChange,
+  onReset,
+  hasActiveFilters,
+  showVisibilityFilter = true,
+}) {
   const { data: filterOptions } = useCameraFilterOptions();
   // Bumped on reset so the uncontrolled search box remounts empty.
   const [searchKey, setSearchKey] = useState(0);
@@ -57,15 +63,17 @@ export function CameraFilters({ params, onChange, onReset, hasActiveFilters }) {
         value={params.zone}
         onChange={(event) => onChange({ zone: event.target.value })}
       />
-      <RoleGate roles={[ROLES.ADMIN]}>
-        <SelectField
-          label="Visibility"
-          className="w-44"
-          options={ACTIVE_FILTER_OPTIONS}
-          value={params.isActive}
-          onChange={(event) => onChange({ isActive: event.target.value })}
-        />
-      </RoleGate>
+      {showVisibilityFilter && (
+        <RoleGate roles={[ROLES.ADMIN]}>
+          <SelectField
+            label="Visibility"
+            className="w-44"
+            options={ACTIVE_FILTER_OPTIONS}
+            value={params.isActive}
+            onChange={(event) => onChange({ isActive: event.target.value })}
+          />
+        </RoleGate>
+      )}
       {hasActiveFilters && (
         <Button variant="ghost" onClick={handleReset}>
           Clear filters

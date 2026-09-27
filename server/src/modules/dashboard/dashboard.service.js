@@ -50,7 +50,12 @@ async function withCameraSummaries(records) {
   const byCameraId = new Map(
     cameras.map((camera) => [
       camera.cameraId,
-      { id: camera._id.toString(), cameraId: camera.cameraId, name: camera.name, zone: camera.zone },
+      {
+        id: camera._id.toString(),
+        cameraId: camera.cameraId,
+        name: camera.name,
+        zone: camera.zone,
+      },
     ]),
   );
   return records.map((record) => ({
@@ -83,13 +88,15 @@ export async function listRecentActivity({ limit, includeAuthEvents }) {
     .populate('userId', 'name role')
     .lean();
 
-  return entries.map(({ _id, userId: user, action, resourceType, resourceId, details, timestamp }) => ({
-    id: _id.toString(),
-    action,
-    resourceType,
-    resourceId,
-    details,
-    timestamp,
-    actor: user ? { id: user._id.toString(), name: user.name, role: user.role } : null,
-  }));
+  return entries.map(
+    ({ _id, userId: user, action, resourceType, resourceId, details, timestamp }) => ({
+      id: _id.toString(),
+      action,
+      resourceType,
+      resourceId,
+      details,
+      timestamp,
+      actor: user ? { id: user._id.toString(), name: user.name, role: user.role } : null,
+    }),
+  );
 }
