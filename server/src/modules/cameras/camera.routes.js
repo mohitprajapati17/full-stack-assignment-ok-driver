@@ -20,6 +20,7 @@ router.use(authenticate);
 
 router.get('/', validate({ query: listCamerasQuerySchema }), cameraController.listCameras);
 router.get('/filter-options', cameraController.getFilterOptions);
+router.get('/locations', cameraController.listCameraLocations);
 router.get('/:id', withId, cameraController.getCamera);
 
 router.post('/', adminOnly, validate({ body: createCameraSchema }), cameraController.createCamera);

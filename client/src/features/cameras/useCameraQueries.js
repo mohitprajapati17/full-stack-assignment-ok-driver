@@ -8,6 +8,7 @@ export const cameraKeys = {
   details: () => [...cameraKeys.all, 'detail'],
   detail: (id) => [...cameraKeys.details(), id],
   filterOptions: () => [...cameraKeys.all, 'filter-options'],
+  locations: () => [...cameraKeys.all, 'locations'],
 };
 
 export function useCameraList(params, options) {
@@ -35,7 +36,7 @@ export function useCameraFilterOptions() {
   });
 }
 
-/** After any write: cache the returned camera and refetch lists and filter options. */
+/** After any write: cache the returned camera and refetch lists, filter options and locations. */
 function useCameraMutation(mutationFn) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -44,6 +45,7 @@ function useCameraMutation(mutationFn) {
       queryClient.setQueryData(cameraKeys.detail(camera.id), camera);
       queryClient.invalidateQueries({ queryKey: cameraKeys.lists() });
       queryClient.invalidateQueries({ queryKey: cameraKeys.filterOptions() });
+      queryClient.invalidateQueries({ queryKey: cameraKeys.locations() });
     },
   });
 }

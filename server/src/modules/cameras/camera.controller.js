@@ -16,6 +16,11 @@ export async function listCameras(req, res) {
   res.json({ data: items.map((camera) => serializeCamera(camera, req.user)), pagination });
 }
 
+export async function listCameraLocations(req, res) {
+  const cameras = await cameraService.listCameraLocations();
+  res.json({ data: cameras.map((camera) => camera.toJSON()) });
+}
+
 export async function getFilterOptions(req, res) {
   res.json({ data: await cameraService.getFilterOptions() });
 }

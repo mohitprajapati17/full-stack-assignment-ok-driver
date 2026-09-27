@@ -235,6 +235,26 @@ describe('GET /api/cameras', () => {
       zones: ['East', 'North', 'South'],
     });
   });
+
+  test('GET /api/cameras/locations returns every active camera with map fields only', async () => {
+    const res = await list('/locations');
+    assert.equal(res.status, 200);
+    assert.deepEqual(
+      res.body.data.map((c) => c.cameraId),
+      ['LIST-01', 'LIST-02', 'LIST-03', 'LIST-04', 'LIST-05'],
+    );
+    assert.deepEqual(Object.keys(res.body.data[0]).sort(), [
+      'cameraId',
+      'department',
+      'id',
+      'latitude',
+      'longitude',
+      'name',
+      'status',
+      'zone',
+    ]);
+    assert.equal((await api.request('GET', '/cameras/locations')).status, 401);
+  });
 });
 
 describe('GET /api/cameras/:id', () => {

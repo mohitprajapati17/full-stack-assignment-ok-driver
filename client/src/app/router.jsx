@@ -24,6 +24,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       {
+        path: 'map',
+        lazy: () => import('@/pages/MapPage').then(({ MapPage }) => ({ Component: MapPage })),
+      },
+      {
         path: 'cameras',
         children: [
           { index: true, element: <CameraListPage /> },

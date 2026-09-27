@@ -52,6 +52,13 @@ export async function listCameras(query) {
   };
 }
 
+const LOCATION_FIELDS = 'cameraId name status zone department latitude longitude lastHeartbeat';
+
+/** Every active camera with just the fields a map needs; unpaginated by design. */
+export function listCameraLocations() {
+  return Camera.find({ isActive: true }).select(LOCATION_FIELDS).sort({ name: 1, _id: 1 });
+}
+
 export async function getFilterOptions() {
   const activeOnly = { isActive: true };
   const [departments, zones] = await Promise.all([

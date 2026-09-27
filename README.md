@@ -177,6 +177,36 @@ Notes:
 - Stream URL credentials (`rtsp://user:pass@host`) are masked as `***` for operators.
 - Create, update, status changes and disable are recorded in the audit log.
 
+### Dashboard
+
+Read-only endpoints for the operations dashboard, available to any signed-in user.
+
+| Method | Path                               | Description                                                              |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------ |
+| GET    | `/api/dashboard/summary`           | Camera counts by status, active alert counts and detections since a time |
+| GET    | `/api/dashboard/active-alerts`     | Newest `NEW`/`ACKNOWLEDGED` alerts with camera and watchlist details     |
+| GET    | `/api/dashboard/recent-detections` | Newest detection events with camera details                              |
+| GET    | `/api/dashboard/recent-activity`   | Newest audit log entries with the acting user; sign-in events admin-only |
+
+- `summary` accepts `detectionsSince` (ISO 8601). The web app sends the viewer's local midnight;
+  the server's midnight is used when omitted. Camera counts only include active cameras.
+- The feed endpoints accept `limit` (1–50, default 10).
+- The dashboard polls these endpoints until Socket.IO realtime updates are added.
+
+### Temporary demo data
+
+Detection ingestion and watchlist matching aren't built yet, so the alert and detection panels
+are empty on a fresh database. For local development you can load tagged sample records and
+remove them again:
+
+```bash
+cd server
+npm run db:demo        # replace previous demo records with a fresh set
+npm run db:demo:clear  # remove all demo records
+```
+
+The script refuses to run in production and only touches records it created.
+
 ## Tests
 
 API integration tests use Node's built-in test runner against a real MongoDB. Each test file
@@ -188,29 +218,32 @@ cd server && npm test
 
 ## Scripts
 
-| Location | Command                   | Description                          |
-| -------- | ------------------------- | ------------------------------------ |
-| server   | `npm run dev`             | Start API with auto-restart          |
-| server   | `npm start`               | Start API (production)               |
-| server   | `npm run db:sync-indexes` | Create/drop indexes to match schemas |
-| server   | `npm run db:seed`         | Seed demo users and sample cameras   |
-| server   | `npm test`                | Run API integration tests            |
-| client   | `npm run dev`             | Start Vite dev server                |
-| client   | `npm run build`           | Production build to `client/dist`    |
-| client   | `npm run preview`         | Preview the production build         |
-| both     | `npm run lint`            | Run ESLint                           |
-| both     | `npm run format`          | Format with Prettier                 |
-| both     | `npm run format:check`    | Check formatting                     |
+| Location | Command                   | Description                           |
+| -------- | ------------------------- | ------------------------------------- |
+| server   | `npm run dev`             | Start API with auto-restart           |
+| server   | `npm start`               | Start API (production)                |
+| server   | `npm run db:sync-indexes` | Create/drop indexes to match schemas  |
+| server   | `npm run db:seed`         | Seed demo users and sample cameras    |
+| server   | `npm run db:demo`         | Load temporary demo detections/alerts |
+| server   | `npm run db:demo:clear`   | Remove temporary demo data            |
+| server   | `npm test`                | Run API integration tests             |
+| client   | `npm run dev`             | Start Vite dev server                 |
+| client   | `npm run build`           | Production build to `client/dist`     |
+| client   | `npm run preview`         | Preview the production build          |
+| both     | `npm run lint`            | Run ESLint                            |
+| both     | `npm run format`          | Format with Prettier                  |
+| both     | `npm run format:check`    | Check formatting                      |
 
 ## Roadmap
 
 - [x] JWT authentication and role-based access (login only; user management pending)
 - [x] Camera registry (CRUD, search, filters, pagination)
+- [x] Operations dashboard (KPIs, camera grid, alerts, detections, activity; REST polling)
 - [ ] Live camera heartbeats and status via Socket.IO
 - [ ] Detections ingestion and search
 - [ ] Watchlist management and matching
 - [ ] Realtime alerts via Socket.IO
 - [ ] Movement history on a Leaflet map
-- [ ] Audit logs
-- [ ] Dashboard metrics
+- [ ] Audit log browser
+- [ ] Live video in the camera grid
 - [ ] Dockerfiles and docker-compose

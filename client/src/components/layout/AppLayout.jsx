@@ -8,6 +8,7 @@ import { formatEnum } from '@/lib/format';
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/cameras', label: 'Cameras' },
+  { to: '/map', label: 'Map' },
 ];
 
 export function AppLayout() {
