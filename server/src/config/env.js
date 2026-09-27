@@ -7,6 +7,8 @@ const envSchema = z.object({
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   MONGODB_MAX_POOL_SIZE: z.coerce.number().int().positive().default(10),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_EXPIRES_IN: z.string().default('8h'),
 });
 
 const parsed = envSchema.safeParse(process.env);
